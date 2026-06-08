@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "type": "string" },
+    "playbookName": { "type": "string", "defaultValue": "Sentinel-M1-Teams-Notification-Playbook" },
+    "teamsConnectionName": { "type": "string", "defaultValue": "sentinel-m1-teams-api-connector" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/connections",
+      "apiVersion": "2016-06-01",
+      "name": "[parameters('teamsConnectionName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "displayName": "SOC Teams Response Channel Connection",
+        "api": {
+          "id": "[format('/subscriptions/{0}/providers/Microsoft.Web/locations/{1}/managedApis/teams', subscription().subscriptionId, parameters('location'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('playbookName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]"
+      ],
+      "properties": {
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "triggers": {
+            "Microsoft_Sentinel_incident": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": { "connection": { "name": "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]" } },
+                "path": "/components/triggers/incident"
+              }
+            }
+          },
+          "actions": {
+            "Post_message_to_SOC_channel": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": { "connection": { "name": "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]" } },
+                "method": "post",
+                "body": {
+                  "message": "<p>🚨 <b>Microsoft Sentinel Alert!</b><br>SOC pipeline detected a threat incident behavior.</p>"
+                },
+                "path": "/v2/teams/conversation/message/post"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
