@@ -25,8 +25,12 @@
         "suppressionDuration": "PT1H",
         "suppressionEnabled": false,
         "startTimeUtc": null,
-        "tactics": [],
-        "techniques": [],
+        "tactics": [
+          "CredentialAccess"
+        ],
+        "techniques": [
+          "T1110"
+        ],
         "subTechniques": [],
         "alertRuleTemplateName": null,
         "incidentConfiguration": {
