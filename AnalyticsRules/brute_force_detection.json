@@ -1,22 +1,64 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": { "workspaceName": { "type": "string" } },
+  "parameters": {
+    "workspaceName": {
+      "type": "string"
+    }
+  },
   "resources": [
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[format('{0}/Microsoft.SecurityInsights/{1}', parameters('workspaceName'), 'c8454504-da31-482f-870a-f0f8d689b140')]",
       "kind": "Scheduled",
+      "apiVersion": "2023-12-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'c8454504-da31-482f-870a-f0f8d689b140')]",
       "properties": {
-        "displayName": "[Modular] Brute Force Detection - Signin Failures",
+        "displayName": "Brute Force Detection - Signin Failures",
+        "description": "Triggers an incident when a single account experiences more than 20 failed logins within a 10-minute window.",
+        "severity": "High",
+        "enabled": true,
         "query": "SigninLogs | where ResultType == '50126' | summarize Count=count() by UserPrincipalName, IPAddress | where Count > 20",
         "queryFrequency": "PT10M",
         "queryPeriod": "PT10M",
-        "severity": "High",
-        "enabled": true,
         "triggerOperator": "GreaterThan",
-        "triggerThreshold": 0
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "startTimeUtc": null,
+        "tactics": [],
+        "techniques": [],
+        "subTechniques": [],
+        "alertRuleTemplateName": null,
+        "incidentConfiguration": {
+          "createIncident": true,
+          "groupingConfiguration": {
+            "enabled": false,
+            "reopenClosedIncident": false,
+            "lookbackDuration": "PT5H",
+            "matchingMethod": "AllEntities",
+            "groupByEntities": [],
+            "groupByAlertDetails": [],
+            "groupByCustomDetails": []
+          }
+        },
+        "eventGroupingSettings": {
+          "aggregationKind": "SingleAlert"
+        },
+        "alertDetailsOverride": null,
+        "customDetails": null,
+        "entityMappings": [
+          {
+            "entityType": "Account",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "UserPrincipalName"
+              }
+            ]
+          }
+        ],
+        "sentinelEntitiesMappings": null,
+        "templateVersion": null
       }
     }
   ]
