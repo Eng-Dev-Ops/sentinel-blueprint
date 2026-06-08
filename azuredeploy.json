@@ -6,7 +6,8 @@
     "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/"
+      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/
+sentinel-blueprint/main/"
     },
     "analyticsRuleFiles": {
       "type": "array",
@@ -26,7 +27,8 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(parameters('_artifactsLocation'), 'Playbooks/teams_notification.json')]"
+          "uri": "[uri(parameters('_artifactsLocation'), 'Playbooks/teams_notification.json')]",
+          "contentVersion": "1.0.0.0"
         },
         "parameters": { "location": { "value": "[parameters('location')]" } }
       }
@@ -82,9 +84,12 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(parameters('_artifactsLocation'), 'AutomationRules/incident_routing.json')]"
+          "uri": "[uri(parameters('_artifactsLocation'), 'AutomationRules/incident_routing.json')]",
+          "contentVersion": "1.0.0.0"
         },
-        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
+        "parameters": {
+          "workspaceName": { "value": "[parameters('workspaceName')]" }
+        }
       }
     }
   ]
