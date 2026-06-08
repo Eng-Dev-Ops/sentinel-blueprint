@@ -2,9 +2,26 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "location": { "type": "string" },
-    "playbookName": { "type": "string", "defaultValue": "Sentinel-M1-Teams-Notification-Playbook" },
-    "teamsConnectionName": { "type": "string", "defaultValue": "sentinel-m1-teams-api-connector" }
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The Azure region target for hosting the Playbook automation resource."
+      }
+    },
+    "playbookName": {
+      "type": "string",
+      "defaultValue": "Sentinel-M1-Teams-Notification-Playbook",
+      "metadata": {
+        "description": "Name designation for the deployed Logic App Playbook."
+      }
+    },
+    "teamsConnectionName": {
+      "type": "string",
+      "defaultValue": "sentinel-m1-teams-api-connector",
+      "metadata": {
+        "description": "The name of the API connection object used by the playbook."
+      }
+    }
   },
   "resources": [
     {
@@ -19,6 +36,7 @@
         }
       }
     },
+
     {
       "type": "Microsoft.Logic/workflows",
       "apiVersion": "2019-05-01",
@@ -34,8 +52,16 @@
             "Microsoft_Sentinel_incident": {
               "type": "ApiConnection",
               "inputs": {
-                "host": { "connection": { "name": "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]" } },
+                "host": {
+                  "connection": {
+                    "name": "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]"
+                  }
+                },
                 "path": "/components/triggers/incident"
+              },
+              "recurrence": {
+                "frequency": "Minute",
+                "interval": 5
               }
             }
           },
@@ -43,15 +69,20 @@
             "Post_message_to_SOC_channel": {
               "type": "ApiConnection",
               "inputs": {
-                "host": { "connection": { "name": "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]" } },
+                "host": {
+                  "connection": {
+                    "name": "[resourceId('Microsoft.Web/connections', parameters('teamsConnectionName'))]"
+                  }
+                },
                 "method": "post",
                 "body": {
-                  "message": "<p>🚨 <b>Microsoft Sentinel Alert!</b><br>SOC pipeline detected a threat incident behavior.</p>"
+                  "message": "<p>🚨 <b>Microsoft Sentinel Incident Alert!</b><br>A threat behavior has been detected and compiled by the SOC pipeline.</p>"
                 },
                 "path": "/v2/teams/conversation/message/post"
               }
             }
-          }
+          },
+          "outputs": {}
         }
       }
     }
