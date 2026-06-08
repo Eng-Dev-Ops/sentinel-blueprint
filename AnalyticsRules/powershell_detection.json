@@ -17,7 +17,7 @@
         "description": "Detects encoded or unusual PowerShell flags commonly used in initial access or execution phases.",
         "severity": "Medium",
         "enabled": true,
-        "query": "SecurityEvent | where ProcessName == 'powershell.exe' and (CommandLine has '-encodedcommand' or CommandLine has '-enc')",
+        "query": "SecurityEvent\n| where EventID == 4688\n| where Process has \"powershell.exe\" or NewProcessName has \"powershell.exe\"\n| where CommandLine has \"-encodedcommand\" or CommandLine has \"-enc\" or CommandLine has \"-e\"",
         "queryFrequency": "PT1H",
         "queryPeriod": "PT1H",
         "triggerOperator": "GreaterThan",
@@ -50,7 +50,17 @@
         },
         "alertDetailsOverride": null,
         "customDetails": null,
-        "entityMappings": [],
+        "entityMappings": [
+          {
+            "entityType": "Host",
+            "fieldMappings": [
+              {
+                "identifier": "FullName",
+                "columnName": "Computer"
+              }
+            ]
+          }
+        ],
         "sentinelEntitiesMappings": null,
         "templateVersion": null
       }
