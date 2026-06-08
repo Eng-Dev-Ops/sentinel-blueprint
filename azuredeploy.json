@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" },
+    "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/"
+    },
+    "analyticsRuleFiles": {
+      "type": "array",
+      "defaultValue": [
+        "brute_force_detection.json",
+        "powershell_detection.json"
+      ]
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "PlaybookDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(parameters('_artifactsLocation'), 'Playbooks/teams_notification.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": { "location": { "value": "[parameters('location')]" } }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[format('RuleDeployment-{0}', json(concat('\"', parameters('analyticsRuleFiles')[copyIndex()], '\"')))]",
+      "copy": {
+        "name": "rulesCopyLoop",
+        "count": "[length(parameters('analyticsRuleFiles'))]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(parameters('_artifactsLocation'), concat('AnalyticsRules/', parameters('analyticsRuleFiles')[copyIndex()]))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "workspaceName": { "value": "[parameters('workspaceName')]" }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "AutomationGlueDeployment",
+      "dependsOn": [
+        "PlaybookDeployment",
+        "rulesCopyLoop" 
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(parameters('_artifactsLocation'), 'AutomationRules/incident_routing.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "workspaceName": { "value": "[parameters('workspaceName')]" }
+        }
+      }
+    }
+  ]
+}
