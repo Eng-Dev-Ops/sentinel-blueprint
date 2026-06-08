@@ -12,7 +12,8 @@
       "type": "array",
       "defaultValue": [
         "brute_force_detection.json",
-        "powershell_detection.json"
+        "powershell_detection.json",
+        "scheduled_task_hide.json"
       ]
     }
   },
