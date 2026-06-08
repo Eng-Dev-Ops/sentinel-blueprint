@@ -6,8 +6,7 @@
     "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/
-sentinel-blueprint/main/"
+      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/"
     },
     "analyticsRuleFiles": {
       "type": "array",
