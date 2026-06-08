@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "string" },
+    "playbookName": { "type": "string", "defaultValue": "Sentinel-M1-Teams-Notification-Playbook" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
+      "apiVersion": "2023-12-01-preview",
+      "name": "[format('{0}/Microsoft.SecurityInsights/{1}', parameters('workspaceName'), '77777777-7777-7777-7777-777777777777')]",
+      "properties": {
+        "displayName": "[Loop-Automation] Route Incidents to Teams Channel",
+        "order": 1,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [],
+          "actions": [
+            {
+              "order": 1,
+              "actionType": "RunPlaybook",
+              "actionConfiguration": {
+                "logicAppResourceId": "[resourceId('Microsoft.Logic/workflows', parameters('playbookName'))]"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
