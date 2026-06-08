@@ -1,0 +1,203 @@
+{
+    "id": "blacklist",
+    "title": "blacklist",
+    "description": "blacklist",
+    "iconType": "ScheduledTask",
+    "skuType": "Consumption",
+    "data": {
+        "definition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "$connections": {
+                    "defaultValue": {},
+                    "type": "Object"
+                }
+            },
+            "triggers": {
+                "Recurrence": {
+                    "recurrence": {
+                        "frequency": "Day",
+                        "interval": 1
+                    },
+                    "evaluatedRecurrence": {
+                        "frequency": "Day",
+                        "interval": 1
+                    },
+                    "type": "Recurrence"
+                }
+            },
+            "actions": {
+                "BLACKLIST_Endpoint": {
+                    "runAfter": {},
+                    "type": "ApiConnection",
+                    "inputs": {
+                        "host": {
+                            "connection": {
+                                "name": "@parameters('$connections')['AbuseIPDBAPI']['connectionId']"
+                            }
+                        },
+                        "method": "get",
+                        "path": "/blacklist",
+                        "queries": {
+                            "confidenceMinimum": 25,
+                            "limit": 10000
+                        }
+                    }
+                },
+                "Initialize_Results_Array": {
+                    "runAfter": {
+                        "Select": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "InitializeVariable",
+                    "inputs": {
+                        "variables": [
+                            {
+                                "name": "Results_Array",
+                                "type": "array",
+                                "value": "@body('Select')"
+                            }
+                        ]
+                    }
+                },
+                "Initialize_Temp_Array": {
+                    "runAfter": {
+                        "Initialize_Working_Array": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "InitializeVariable",
+                    "inputs": {
+                        "variables": [
+                            {
+                                "name": "Temp_Array",
+                                "type": "array"
+                            }
+                        ]
+                    }
+                },
+                "Initialize_Working_Array": {
+                    "runAfter": {
+                        "Initialize_Results_Array": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "InitializeVariable",
+                    "inputs": {
+                        "variables": [
+                            {
+                                "name": "Working_array",
+                                "type": "array"
+                            }
+                        ]
+                    }
+                },
+                "Select": {
+                    "runAfter": {
+                        "BLACKLIST_Endpoint": [
+                            "Succeeded"
+                        ]
+                    },
+                    "type": "Select",
+                    "inputs": {
+                        "from": "@body('BLACKLIST_Endpoint')?['data']",
+                        "select": {
+                            "action": "alert",
+                            "confidence": "@item()['abuseConfidenceScore']",
+                            "description": "AbuseIPDB BLACKLIST Indicator ",
+                            "expirationDateTime": "@addDays(utcNow(),7)",
+                            "lastReportedDateTime": "@item()['lastReportedAt']",
+                            "networkDestinationIPv4": "@item()['ipAddress']",
+                            "targetProduct": "Azure Sentinel",
+                            "threatType": "WatchList",
+                            "tlpLevel": "unknown"
+                        }
+                    }
+                },
+                "Until": {
+                    "actions": {
+                        "Remove_Items_From_Results_Array": {
+                            "runAfter": {
+                                "Set_Temp_Array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                                "name": "Results_Array",
+                                "value": "@variables('Temp_Array')"
+                            }
+                        },
+                        "Set_Temp_Array": {
+                            "runAfter": {
+                                "Submit_multiple_tiIndicators": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                                "name": "Temp_Array",
+                                "value": "@skip(variables('Results_Array'),100)"
+                            }
+                        },
+                        "Set_Working_Array": {
+                            "runAfter": {},
+                            "type": "SetVariable",
+                            "inputs": {
+                                "name": "Working_array",
+                                "value": "@take(variables('Results_Array'), 100)"
+                            }
+                        },
+                        "Submit_multiple_tiIndicators": {
+                            "runAfter": {
+                                "Set_Working_Array": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "value": "@variables('Working_array')"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['microsoftgraphsecurity']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/beta/security/tiIndicators/submitTiIndicators"
+                            }
+                        }
+                    },
+                    "runAfter": {
+                        "Initialize_Temp_Array": [
+                            "Succeeded"
+                        ]
+                    },
+                    "expression": "@equals(length(variables('Results_Array')), 0)",
+                    "limit": {
+                        "count": 5000,
+                        "timeout": "PT1H"
+                    },
+                    "type": "Until"
+                }
+            },
+            "outputs": {}
+        },
+        "parameters": {},
+        "connections": {
+            "AbuseIPDBAPI": {
+                "id": "/subscriptions/0000-0000/resourceGroups/DevTestSentinel/providers/Microsoft.Web/customApis/AbuseIPDBAPI",
+                "connectionId": "",
+                "connectionName": ""
+            },
+            "microsoftgraphsecurity": {
+                "id": "/subscriptions/0000-0000/providers/Microsoft.Web/locations/southeastasia/managedApis/microsoftgraphsecurity",
+                "connectionId": "",
+                "connectionName": ""
+            }
+        }
+    }
+}
