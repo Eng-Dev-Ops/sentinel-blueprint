@@ -3,15 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "workspaceName": {
-      "type": "string"
+      "type": "String"
     }
   },
   "resources": [
     {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/alertRules/da730419-4ba2-47db-9076-a0792ce376b8')]",
+      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/da730419-4ba2-47db-9076-a0792ce376b8')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
       "kind": "Scheduled",
       "apiVersion": "2023-12-01-preview",
-      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', 'da730419-4ba2-47db-9076-a0792ce376b8')]",
       "properties": {
         "displayName": "Suspicious PowerShell Execution",
         "description": "Detects encoded or unusual PowerShell flags commonly used in initial access or execution phases.",
