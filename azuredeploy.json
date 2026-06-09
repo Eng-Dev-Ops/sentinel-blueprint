@@ -72,7 +72,8 @@
       ],
       "copy": {
         "name": "rulesCopyLoop",
-        "count": "[length(parameters('analyticsRuleFiles'))]"
+        "count": "[length(parameters('analyticsRuleFiles'))]",
+        "batchSize": 1
       },
       "properties": {
         "mode": "Incremental",
