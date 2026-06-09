@@ -1,0 +1,39 @@
+name: Auto Update Sentinel Rules List
+
+on:
+  push:
+    paths:
+      - 'AnalyticsRules/**'
+permissions:
+  contents: write
+
+jobs:
+  update-list:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Scan Folder and Update azuredeploy.json
+        run: |
+          echo " Scanning AnalyticsRules folder..."
+
+          FILES=$(ls AnalyticsRules/*.json | grep -v "sentinel_onboarding.json" | xargs -n 1 basename)
+
+          JSON_ARRAY=$(echo "$FILES" | jq -R . | jq -s -c .)
+          echo " Generated Rule Array: $JSON_ARRAY"
+
+          jq --argjson new_list "$JSON_ARRAY" '.parameters.analyticsRuleFiles.defaultValue = $new_list' azuredeploy.json > temp.json && mv temp.json azuredeploy.json
+
+      - name: Commit and Push Changes back to Repo
+        run: |
+          git config --global user.name "Github Actions Robot"
+          git config --global user.email "actions@github.com"
+          
+          git add azuredeploy.json
+          if git diff-index --quiet HEAD --; then
+            echo " No changes detected in the rule list."
+          else
+            git commit -m "automation: dynamically updated analyticsRuleFiles list with new rules"
+            git push
+          fi
