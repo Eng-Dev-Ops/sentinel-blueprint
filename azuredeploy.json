@@ -38,9 +38,6 @@
     }
   },
   "resources": [
-    // =========================================================================
-    // LIFECYCLE STAGE 0: Deploy User-Assigned Managed Identity Natively
-    // =========================================================================
     {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "apiVersion": "2023-01-31",
@@ -48,9 +45,6 @@
       "location": "[parameters('location')]"
     },
 
-    // =========================================================================
-    // LIFECYCLE STAGE 1 & 2: Deploy Playbook Infrastructure
-    // =========================================================================
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -65,9 +59,6 @@
       }
     },
 
-    // =========================================================================
-    // LIFECYCLE STAGE 2.5: Resilient Sentinel Onboarding Block (Uses Conditional Flag)
-    // =========================================================================
     {
       "condition": "[parameters('isOnboardingRequired')]",
       "type": "Microsoft.Resources/deployments",
@@ -85,9 +76,6 @@
       }
     },
 
-    // =========================================================================
-    // LIFECYCLE STAGE 3: Run Analytics Rules Loop Natively (Sequential Batching)
-    // =========================================================================
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -113,9 +101,6 @@
       }
     },
 
-    // =========================================================================
-    // LIFECYCLE STAGE 4: Fully Automated Cross-Client Automation Rule
-    // =========================================================================
     {
       "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/AutomationRules/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
       "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
