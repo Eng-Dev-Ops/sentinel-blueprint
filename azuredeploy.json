@@ -6,7 +6,7 @@
     "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/<YOUR_REPO_NAME>/main/"
+      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/"
     },
     "analyticsRuleFiles": {
       "type": "array",
@@ -22,11 +22,9 @@
     }
   },
   "variables": {
-    // Native GUID for 'Microsoft Sentinel Playbook Responder' role
     "playbookResponderRoleDefinitionId": "f05b4121-b193-4c12-8684-edf0307e8cc1"
   },
   "resources": [
-    // 1 & 2. Deploy Playbook Infrastructure
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -41,7 +39,6 @@
       }
     },
 
-    // 2.5 Force Sentinel Activation First
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -58,7 +55,6 @@
       }
     },
 
-    // 3. Run Analytics Rules Loop (WAITS FOR ONBOARDING)
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -82,7 +78,6 @@
       }
     },
 
-    // 3.5 AUTOMATED SECURITY CLEARANCE: Grant Sentinel access to the Playbook
     {
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
@@ -97,7 +92,6 @@
       }
     },
 
-    // 4. Fully Automated Cross-Client Automation Rule
     {
       "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/AutomationRules/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
       "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
