@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": { "workspaceName": { "type": "String" } },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/alertRules/f485f056-6267-4729-90de-4d971eb0786b')]",
+      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/f485f056-6267-4729-90de-4d971eb0786b')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "Attempts to sign in to disabled accounts",
+        "description": "Identifies failed attempts to sign in to disabled accounts across multiple Azure Applications.",
+        "severity": "Medium",
+        "enabled": true,
+        "query": "let threshold = 3;\nlet aadFunc = (tableName:string){\ntable(tableName)\n| where ResultType == \"50057\"\n| where ResultDescription =~ \"User account is disabled. The account has been disabled by an administrator.\"\n| summarize StartTime = min(TimeGenerated), EndTime = max(TimeGenerated), applicationCount = dcount(AppDisplayName),\napplicationSet = make_set(AppDisplayName), count() by UserPrincipalName, IPAddress, Type\n| where applicationCount >= threshold\n| extend Name = tostring(split(UserPrincipalName,'@',0)[0]), UPNSuffix = tostring(split(UserPrincipalName,'@',1)[0])\n};\nlet aadSignin = aadFunc(\"SigninLogs\");\nlet aadNonInt = aadFunc(\"AADNonInteractiveUserSignInLogs\");\nunion isfuzzy=true aadSignin, aadNonInt",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "tactics": ["InitialAccess"],
+        "techniques": ["T1078"],
+        "incidentConfiguration": { "createIncident": true, "groupingConfiguration": { "enabled": false, "reopenClosedIncident": false, "lookbackDuration": "PT5H", "matchingMethod": "AllEntities" } },
+        "eventGroupingSettings": { "aggregationKind": "SingleAlert" },
+        "entityMappings": [
+          { "entityType": "Account", "fieldMappings": [{ "identifier": "FullName", "columnName": "UserPrincipalName" }] }
+        ]
+      }
+    }
+  ]
+}
