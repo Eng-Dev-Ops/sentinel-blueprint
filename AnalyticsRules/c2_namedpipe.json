@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": { "workspaceName": { "type": "String" } },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/alertRules/1f714b11-ab3d-4cb9-a3c9-59c9627b9a86')]",
+      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/1f714b11-ab3d-4cb9-a3c9-59c9627b9a86')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "C2-NamedPipe",
+        "description": "Detects the creation of a named pipe used by known APT malware.",
+        "severity": "High",
+        "enabled": true,
+        "query": "let badPipeNames = pack_array('\\\\psexec', '\\\\paexec', '\\\\remcom', '\\\\csexec', '\\\\isapi_http', '\\\\isapi_dg', '\\\\isapi_dg2', '\\\\sdlrpc', '\\\\ahexec', '\\\\winsession', '\\\\lsassw', '\\\\46a676ab7f179e511e30dd2dc41bd388', '\\\\9f81f59bc58452127884ce513865ed20', '\\\\e710f28d59aa529d6792ca6ff0ca1b34', '\\\\rpchlp_3', '\\\\NamePipe_MoreWindows', '\\\\pcheap_reuse', '\\\\gruntsvc', '\\\\583da945-62af-10e8-4902-a8f205c72b2e', '\\\\bizkaz', '\\\\atctl', '\\\\userpipe', '\\\\iehelper', '\\\\sdlrpc', '\\\\comnap', '\\\\lsadump', '\\\\cachedump', '\\\\wceservicepipe', '\\\\jaccdpqnvbrrxlaf', '\\\\svcctl', '\\\\csexecsvc', '\\\\status_', '\\\\MSSE-', '\\\\status_', '\\\\msagent_', '\\\\postex_ssh_', '\\\\postex_', '\\\\Posh');\nDeviceEvents\n| where ActionType == \"NamedPipeEvent\"\n| extend ParsedFields=parse_json(AdditionalFields)\n| where ParsedFields.FileOperation == \"File created\"\n| where ParsedFields.PipeName has_any (badPipeNames)\n| project TimeGenerated, ActionType, DeviceName, InitiatingProcessAccountDomain, InitiatingProcessAccountName, InitiatingProcessFolderPath, InitiatingProcessCommandLine, ParsedFields.FileOperation, ParsedFields.PipeName\n| extend HostName = iff(DeviceName has '.', substring(DeviceName, 0, indexof(DeviceName, '.')), DeviceName)\n| extend DnsDomain = iff(DeviceName has '.', substring(DeviceName, indexof(DeviceName, '.') + 1), \"\")",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "tactics": ["CommandAndControl"],
+        "techniques": ["T1105"],
+        "incidentConfiguration": { "createIncident": true, "groupingConfiguration": { "enabled": false, "reopenClosedIncident": false, "lookbackDuration": "PT5H", "matchingMethod": "AllEntities" } },
+        "eventGroupingSettings": { "aggregationKind": "SingleAlert" },
+        "entityMappings": [
+          { "entityType": "Host", "fieldMappings": [{ "identifier": "FullName", "columnName": "DeviceName" }, { "identifier": "HostName", "columnName": "HostName" }] }
+        ]
+      }
+    }
+  ]
+}
