@@ -2,8 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workspaceName": { "type": "string" },
-    "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
+    "workspaceName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
     "isOnboardingRequired": {
       "type": "bool",
       "defaultValue": true
@@ -15,13 +20,26 @@
     "analyticsRuleFiles": {
       "type": "array",
       "defaultValue": [
-        "brute_force_detection.json"
+        "brute_force_detection.json",
+        "c2_namedpipe.json",
+        "disabled_accounts_signin.json",
+        "domain_federation_modified.json",
+        "mfa_spamming.json",
+        "powershell_detection.json",
+        "scheduled_task_hide.json",
+        "sunburst_hashes.json",
+        "unusual_file_deletion.json"
       ]
     },
     "automationRuleFiles": {
       "type": "array",
       "defaultValue": [
-        "autonomous_noise_mitigation.json"
+        "autonomous_noise_mitigation.json",
+        "emergency_p1_escalation.json",
+        "incident_routing.json",
+        "mssp_identity_containment.json",
+        "ti_incident_enrichment.json",
+        "tier1_triage_notification.json"
       ]
     },
     "playbookName": {
@@ -40,7 +58,6 @@
       "name": "[parameters('managedIdentityName')]",
       "location": "[parameters('location')]"
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -51,10 +68,13 @@
           "uri": "[uri(parameters('_artifactsLocation'), 'Playbooks/teams_notification.json')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": { "location": { "value": "[parameters('location')]" } }
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        }
       }
     },
-
     {
       "condition": "[parameters('isOnboardingRequired')]",
       "type": "Microsoft.Resources/deployments",
@@ -66,15 +86,20 @@
           "uri": "[uri(parameters('_artifactsLocation'), 'AnalyticsRules/sentinel_onboarding.json')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
+        "parameters": {
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
+        }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "[format('AnalyticsRule-{0}', json(concat('\"', parameters('analyticsRuleFiles')[copyIndex()], '\"')))]",
-      "dependsOn": [ "PlaybookDeployment" ],
+      "dependsOn": [
+        "PlaybookDeployment"
+      ],
       "copy": {
         "name": "analyticsCopyLoop",
         "count": "[length(parameters('analyticsRuleFiles'))]",
@@ -87,15 +112,20 @@
           "uri": "[uri(parameters('_artifactsLocation'), concat('AnalyticsRules/', parameters('analyticsRuleFiles')[copyIndex()]))]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
+        "parameters": {
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
+        }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "name": "[format('AutomationRule-{0}', json(concat('\"', parameters('automationRuleFiles')[copyIndex()], '\"')))]",
-      "dependsOn": [ "analyticsCopyLoop" ],
+      "dependsOn": [
+        "analyticsCopyLoop"
+      ],
       "copy": {
         "name": "automationCopyLoop",
         "count": "[length(parameters('automationRuleFiles'))]",
@@ -108,7 +138,11 @@
           "uri": "[uri(parameters('_artifactsLocation'), concat('AutomationRules/', parameters('automationRuleFiles')[copyIndex()]))]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
+        "parameters": {
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
+        }
       }
     }
   ]
