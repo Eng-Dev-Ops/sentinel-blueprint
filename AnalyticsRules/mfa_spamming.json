@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": { "workspaceName": { "type": "String" } },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/alertRules/efa574d3-a6cd-430e-89f3-d78523bfe051')]",
+      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/efa574d3-a6cd-430e-89f3-d78523bfe051')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "MFA Spamming followed by Successful login",
+        "description": "Identifies MFA Spamming followed by Successful logins within a short time window.",
+        "severity": "High",
+        "enabled": true,
+        "query": "SigninLogs\n| where ingestion_time() > ago(1d)\n| where AuthenticationRequirement == \"multiFactorAuthentication\"\n| extend DeviceDetail = todynamic(DeviceDetail), LocationDetails = todynamic(LocationDetails)\n| extend OS = tostring(DeviceDetail.operatingSystem), Browser = tostring(DeviceDetail.browser), State = tostring(LocationDetails.state), City = tostring(LocationDetails.city), Region = tostring(LocationDetails.countryOrRegion)\n| mv-expand todynamic(AuthenticationDetails)\n| extend AuthResult = tostring(parse_json(AuthenticationDetails).authenticationStepResultDetail)\n| summarize FailedAttempts = countif(AuthResult == \"MFA denied; user declined the authentication\" or AuthResult == \"MFA denied; user did not respond to mobile app notification\"), SuccessfulAttempts = countif(AuthResult == \"MFA successfully completed\"), InvolvedOS = make_set(OS, 5), InvolvedBrowser = make_set(Browser), StartTime = min(TimeGenerated), EndTime = max(TimeGenerated) by UserPrincipalName, IPAddress, State, City, Region\n| extend AuthenticationWindow = (EndTime - StartTime)\n| where FailedAttempts > 10 and AuthenticationWindow <= 5m and SuccessfulAttempts >= 1\n| extend Name = tostring(split(UserPrincipalName, '@', 0)[0]), UPNSuffix = tostring(split(UserPrincipalName, '@', 1)[0])",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "tactics": ["CredentialAccess"],
+        "techniques": ["T1110"],
+        "incidentConfiguration": { "createIncident": true, "groupingConfiguration": { "enabled": false, "reopenClosedIncident": false, "lookbackDuration": "PT5H", "matchingMethod": "AllEntities" } },
+        "eventGroupingSettings": { "aggregationKind": "SingleAlert" }
+      }
+    }
+  ]
+}
