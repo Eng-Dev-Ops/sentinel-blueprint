@@ -19,13 +19,28 @@ jobs:
       - name: Sync Folders to azuredeploy.json Manifest Arrays
         run: |
           echo " Scanning AnalyticsRules..."
-          ANALYTICS_FILES=$(ls AnalyticsRules/*.json | grep -v "sentinel_onboarding.json" | xargs -n 1 basename)
-          ANALYTICS_JSON=$(echo "$ANALYTICS_FILES" | jq -R . | jq -s -c .)
+          # Added "|| true" so the runner never crashes if the search hits a character resolution boundary
+          ANALYTICS_FILES=$(ls AnalyticsRules/*.json 2>/dev/null | grep -v "sentinel_onboarding.json" | xargs -n 1 basename || true)
+          
+          if [ -z "$ANALYTICS_FILES" ]; then
+            ANALYTICS_JSON="[]"
+          else
+            ANALYTICS_JSON=$(echo "$ANALYTICS_FILES" | jq -R . | jq -s -c .)
+          fi
           
           echo " Scanning AutomationRules..."
-          AUTOMATION_FILES=$(ls AutomationRules/*.json | xargs -n 1 basename)
-          AUTOMATION_JSON=$(echo "$AUTOMATION_FILES" | jq -R . | jq -s -c .)
+          AUTOMATION_FILES=$(ls AutomationRules/*.json 2>/dev/null | xargs -n 1 basename || true)
           
+          if [ -z "$AUTOMATION_FILES" ]; then
+            AUTOMATION_JSON="[]"
+          else
+            AUTOMATION_JSON=$(echo "$AUTOMATION_FILES" | jq -R . | jq -s -c .)
+          fi
+          
+          echo " Analytics Rules Found: $ANALYTICS_JSON"
+          echo " Automation Rules Found: $AUTOMATION_JSON"
+          
+          # Inject both generated lists straight into their respective parameter fields inside master azuredeploy.json
           jq --argjson alist "$ANALYTICS_JSON" --argjson olist "$AUTOMATION_JSON" \
             '.parameters.analyticsRuleFiles.defaultValue = $alist | .parameters.automationRuleFiles.defaultValue = $olist' \
             azuredeploy.json > temp.json && mv temp.json azuredeploy.json
