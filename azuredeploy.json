@@ -2,8 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workspaceName": { "type": "string" },
-    "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
+    "workspaceName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
     "_artifactsLocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/"
@@ -12,15 +17,16 @@
       "type": "array",
       "defaultValue": [
         "brute_force_detection.json",
-        "powershell_detection.json",
-        "scheduled_task_hide.json",
-        "unusual_file_deletion.json",
-        "sunburst_hashes.json",
         "c2_namedpipe.json",
         "disabled_accounts_signin.json",
         "domain_federation_modified.json",
+        "mfa_spamming.json",
+        "powershell_detection.json",
+        "scheduled_task_hide.json",
+        "service_account_remoteps.json",
         "service_accounts_remoteps.json",
-        "mfa_spamming.json"
+        "sunburst_hashes.json",
+        "unusual_file_deletion.json"
       ]
     },
     "playbookName": {
@@ -39,7 +45,6 @@
       "name": "[parameters('managedIdentityName')]",
       "location": "[parameters('location')]"
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -50,10 +55,13 @@
           "uri": "[uri(parameters('_artifactsLocation'), 'Playbooks/teams_notification.json')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": { "location": { "value": "[parameters('location')]" } }
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -65,11 +73,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -90,11 +99,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     },
-
     {
       "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/AutomationRules/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
       "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
