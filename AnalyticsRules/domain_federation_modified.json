@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": { "workspaceName": { "type": "String" } },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/alertRules/71b3aa9c-5916-4981-8325-6c954bf00982')]",
+      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/71b3aa9c-5916-4981-8325-6c954bf00982')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+      "kind": "Scheduled",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "Modified domain federation trust settings",
+        "description": "This will alert when a user or application modifies the federation settings on the domain.",
+        "severity": "High",
+        "enabled": true,
+        "query": "(union isfuzzy=true\n(AuditLogs | where OperationName =~ \"Set federation settings on domain\" | mv-expand TargetResources | extend modifiedProperties = parse_json(TargetResources).modifiedProperties | mv-expand modifiedProperties | extend targetDisplayName = tostring(parse_json(modifiedProperties).displayName)),\n(AuditLogs | where OperationName =~ \"Set domain authentication\" | mv-expand TargetResources | extend modifiedProperties = parse_json(TargetResources).modifiedProperties | mv-expand modifiedProperties | mv-apply Property = modifiedProperties on (where Property.displayName =~ \"LiveType\" | extend targetDisplayName = tostring(Property.displayName), NewDomainValue = tostring(Property.newValue)) | where NewDomainValue has \"Federated\"))\n| mv-apply AdditionalDetail = AdditionalDetails on (where AdditionalDetail.key =~ \"User-Agent\" | extend UserAgent = tostring(AdditionalDetail.value))\n| extend InitiatingUserOrApp = iff(isnotempty(InitiatedBy.user.userPrincipalName),tostring(InitiatedBy.user.userPrincipalName), tostring(InitiatedBy.app.displayName))\n| extend InitiatingAppName = tostring(InitiatedBy.app.displayName)\n| extend InitiatingAppServicePrincipalId = tostring(InitiatedBy.app.servicePrincipalId)\n| extend InitiatingUserPrincipalName = tostring(InitiatedBy.user.userPrincipalName)\n| extend InitiatingAadUserId = tostring(InitiatedBy.user.id)\n| extend InitiatingIpAddress = tostring(iff(isnotempty(InitiatedBy.user.ipAddress), InitiatedBy.user.ipAddress, InitiatedBy.app.ipAddress))\n| extend InitiatingAccountName = tostring(split(InitiatingUserPrincipalName, \"@\")[0]), InitiatingAccountUPNSuffix = tostring(split(InitiatingUserPrincipalName, \"@\")[1])\n| project-reorder TimeGenerated, OperationName, InitiatingUserOrApp, targetDisplayName, Result, InitiatingIpAddress",
+        "queryFrequency": "P1D",
+        "queryPeriod": "P1D",
+        "triggerOperator": "GreaterThan",
+        "triggerThreshold": 0,
+        "suppressionDuration": "PT1H",
+        "suppressionEnabled": false,
+        "tactics": ["CredentialAccess", "Persistence", "PrivilegeEscalation"],
+        "techniques": ["T1555", "T1098"],
+        "incidentConfiguration": { "createIncident": true, "groupingConfiguration": { "enabled": false, "reopenClosedIncident": false, "lookbackDuration": "PT5H", "matchingMethod": "AllEntities" } },
+        "eventGroupingSettings": { "aggregationKind": "SingleAlert" }
+      }
+    }
+  ]
+}
