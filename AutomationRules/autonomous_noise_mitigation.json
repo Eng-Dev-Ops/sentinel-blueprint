@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "String" }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/71a89cb4-8041-4edc-a64c-1db3f1573bfc')]",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/71a89cb4-8041-4edc-a64c-1db3f1573bfc')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "Autonomous-Noise-Mitigation",
+        "order": 5,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": [ "Informational" ]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "ModifyProperties",
+            "actionConfiguration": {
+              "status": "Closed",
+              "classification": "FalsePositive",
+              "classificationReason": "IncorrectAlertLogic"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
