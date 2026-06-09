@@ -2,19 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workspaceName": {
-      "type": "string"
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]"
-    },
+    "workspaceName": { "type": "string" },
+    "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
     "isOnboardingRequired": {
       "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Set to false if Microsoft Sentinel is already active on this workspace to avoid onboarding conflicts."
-      }
+      "defaultValue": true
     },
     "_artifactsLocation": {
       "type": "string",
@@ -23,15 +15,13 @@
     "analyticsRuleFiles": {
       "type": "array",
       "defaultValue": [
-        "brute_force_detection.json",
-        "c2_namedpipe.json",
-        "disabled_accounts_signin.json",
-        "domain_federation_modified.json",
-        "mfa_spamming.json",
-        "powershell_detection.json",
-        "scheduled_task_hide.json",
-        "sunburst_hashes.json",
-        "unusual_file_deletion.json"
+        "brute_force_detection.json"
+      ]
+    },
+    "automationRuleFiles": {
+      "type": "array",
+      "defaultValue": [
+        "autonomous_noise_mitigation.json"
       ]
     },
     "playbookName": {
@@ -50,6 +40,7 @@
       "name": "[parameters('managedIdentityName')]",
       "location": "[parameters('location')]"
     },
+
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -60,13 +51,10 @@
           "uri": "[uri(parameters('_artifactsLocation'), 'Playbooks/teams_notification.json')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": {
-          "location": {
-            "value": "[parameters('location')]"
-          }
-        }
+        "parameters": { "location": { "value": "[parameters('location')]" } }
       }
     },
+
     {
       "condition": "[parameters('isOnboardingRequired')]",
       "type": "Microsoft.Resources/deployments",
@@ -78,22 +66,17 @@
           "uri": "[uri(parameters('_artifactsLocation'), 'AnalyticsRules/sentinel_onboarding.json')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": {
-          "workspaceName": {
-            "value": "[parameters('workspaceName')]"
-          }
-        }
+        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
       }
     },
+
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "[format('RuleDeployment-{0}', json(concat('\"', parameters('analyticsRuleFiles')[copyIndex()], '\"')))]",
-      "dependsOn": [
-        "PlaybookDeployment"
-      ],
+      "name": "[format('AnalyticsRule-{0}', json(concat('\"', parameters('analyticsRuleFiles')[copyIndex()], '\"')))]",
+      "dependsOn": [ "PlaybookDeployment" ],
       "copy": {
-        "name": "rulesCopyLoop",
+        "name": "analyticsCopyLoop",
         "count": "[length(parameters('analyticsRuleFiles'))]",
         "mode": "Serial",
         "batchSize": 1
@@ -104,42 +87,28 @@
           "uri": "[uri(parameters('_artifactsLocation'), concat('AnalyticsRules/', parameters('analyticsRuleFiles')[copyIndex()]))]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": {
-          "workspaceName": {
-            "value": "[parameters('workspaceName')]"
-          }
-        }
+        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
       }
     },
+
     {
-      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/AutomationRules/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
-      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
-      "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
-      "apiVersion": "2023-12-01-preview",
-      "dependsOn": [
-        "PlaybookDeployment",
-        "rulesCopyLoop",
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]"
-      ],
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "[format('AutomationRule-{0}', json(concat('\"', parameters('automationRuleFiles')[copyIndex()], '\"')))]",
+      "dependsOn": [ "analyticsCopyLoop" ],
+      "copy": {
+        "name": "automationCopyLoop",
+        "count": "[length(parameters('automationRuleFiles'))]",
+        "mode": "Serial",
+        "batchSize": 1
+      },
       "properties": {
-        "displayName": "Client-A-Auto-Triage-and-Notify",
-        "order": 1,
-        "triggeringLogic": {
-          "isEnabled": true,
-          "triggersOn": "Incidents",
-          "triggersWhen": "Created",
-          "conditions": []
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(parameters('_artifactsLocation'), concat('AutomationRules/', parameters('automationRuleFiles')[copyIndex()]))]",
+          "contentVersion": "1.0.0.0"
         },
-        "actions": [
-          {
-            "order": 1,
-            "actionType": "RunPlaybook",
-            "actionConfiguration": {
-              "logicAppResourceId": "[resourceId('Microsoft.Logic/workflows', parameters('playbookName'))]",
-              "tenantId": "[subscription().tenantId]"
-            }
-          }
-        ]
+        "parameters": { "workspaceName": { "value": "[parameters('workspaceName')]" } }
       }
     }
   ]
