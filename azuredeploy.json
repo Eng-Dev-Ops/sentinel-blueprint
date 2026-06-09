@@ -87,7 +87,7 @@
       ],
       "properties": {
         "roleDefinitionId": "[tenantResourceId('Microsoft.Authorization/roleDefinitions', variables('playbookResponderRoleDefinitionId'))]",
-        "principalId": "307907f7-4bb6-4f16-a67d-b9fb26158293", // Your regional Sentinel App Service Principal ID
+        "principalId": "307907f7-4bb6-4f16-a67d-b9fb26158293",
         "principalType": "ServicePrincipal"
       }
     },
