@@ -19,9 +19,20 @@
     "playbookName": {
       "type": "string",
       "defaultValue": "Sentinel-M1-Teams-Notification-Playbook"
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "defaultValue": "Sentinel-Playbook-Execution-Identity"
     }
   },
   "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[parameters('managedIdentityName')]",
+      "location": "[parameters('location')]"
+    },
+
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -82,7 +93,8 @@
       "apiVersion": "2023-12-01-preview",
       "dependsOn": [
         "PlaybookDeployment",
-        "rulesCopyLoop"
+        "rulesCopyLoop",
+        "Microsoft.ManagedIdentity/userAssignedIdentities/parameters('managedIdentityName')"
       ],
       "properties": {
         "displayName": "Client-A-Auto-Triage-and-Notify",
