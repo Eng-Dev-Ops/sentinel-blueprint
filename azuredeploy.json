@@ -13,7 +13,14 @@
       "defaultValue": [
         "brute_force_detection.json",
         "powershell_detection.json",
-        "scheduled_task_hide.json"
+        "scheduled_task_hide.json",
+        "unusual_file_deletion.json",
+        "sunburst_hashes.json",
+        "c2_namedpipe.json",
+        "disabled_accounts_signin.json",
+        "domain_federation_modified.json",
+        "service_accounts_remoteps.json",
+        "mfa_spamming.json"
       ]
     },
     "playbookName": {
