@@ -1,39 +1,43 @@
-name: Auto Update Sentinel Rules List
+name: Auto Update Sentinel Blueprints Manifest
 
 on:
   push:
     paths:
       - 'AnalyticsRules/**'
+      - 'AutomationRules/**'
+
 permissions:
   contents: write
 
 jobs:
-  update-list:
+  update-manifest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Scan Folder and Update azuredeploy.json
+      - name: Sync Folders to azuredeploy.json Manifest Arrays
         run: |
-          echo " Scanning AnalyticsRules folder..."
+          echo " Scanning AnalyticsRules..."
+          ANALYTICS_FILES=$(ls AnalyticsRules/*.json | grep -v "sentinel_onboarding.json" | xargs -n 1 basename)
+          ANALYTICS_JSON=$(echo "$ANALYTICS_FILES" | jq -R . | jq -s -c .)
+          
+          echo " Scanning AutomationRules..."
+          AUTOMATION_FILES=$(ls AutomationRules/*.json | xargs -n 1 basename)
+          AUTOMATION_JSON=$(echo "$AUTOMATION_FILES" | jq -R . | jq -s -c .)
+          
+          jq --argjson alist "$ANALYTICS_JSON" --argjson olist "$AUTOMATION_JSON" \
+            '.parameters.analyticsRuleFiles.defaultValue = $alist | .parameters.automationRuleFiles.defaultValue = $olist' \
+            azuredeploy.json > temp.json && mv temp.json azuredeploy.json
 
-          FILES=$(ls AnalyticsRules/*.json | grep -v "sentinel_onboarding.json" | xargs -n 1 basename)
-
-          JSON_ARRAY=$(echo "$FILES" | jq -R . | jq -s -c .)
-          echo " Generated Rule Array: $JSON_ARRAY"
-
-          jq --argjson new_list "$JSON_ARRAY" '.parameters.analyticsRuleFiles.defaultValue = $new_list' azuredeploy.json > temp.json && mv temp.json azuredeploy.json
-
-      - name: Commit and Push Changes back to Repo
+      - name: Commit and Push Manifest Synchronization Changes
         run: |
           git config --global user.name "Github Actions Robot"
           git config --global user.email "actions@github.com"
-          
           git add azuredeploy.json
           if git diff-index --quiet HEAD --; then
-            echo " No changes detected in the rule list."
+            echo " Manifest profiles are perfectly in sync."
           else
-            git commit -m "automation: dynamically updated analyticsRuleFiles list with new rules"
+            git commit -m "automation: dynamically tracked new analytics and automation rule templates"
             git push
           fi
