@@ -94,7 +94,7 @@
       "dependsOn": [
         "PlaybookDeployment",
         "rulesCopyLoop",
-        "Microsoft.ManagedIdentity/userAssignedIdentities/parameters('managedIdentityName')"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]"
       ],
       "properties": {
         "displayName": "Client-A-Auto-Triage-and-Notify",
