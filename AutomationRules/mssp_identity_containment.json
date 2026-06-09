@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "String" },
+    "playbookResourceGroup": { "type": "string", "defaultValue": "[resourceGroup().name]" }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/ca455e48-beb2-4da9-a16e-1cffbd9e07cc')]",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/ca455e48-beb2-4da9-a16e-1cffbd9e07cc')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "MSSP-Identity-Active-Containment",
+        "order": 1,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentTactics",
+                "operator": "Contains",
+                "propertyValues": [ "CredentialAccess" ]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "ModifyProperties",
+            "actionConfiguration": {
+              "status": "Active"
+            }
+          },
+          {
+            "order": 2,
+            "actionType": "ModifyProperties",
+            "actionConfiguration": {
+              "severity": "High"
+            }
+          },
+          {
+            "order": 3,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[tenantResourceId('Microsoft.Logic/workflows', parameters('playbookResourceGroup'), 'AS-Azure-AD-Disable-User')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
