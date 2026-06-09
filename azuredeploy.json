@@ -21,9 +21,6 @@
       "defaultValue": "Sentinel-M1-Teams-Notification-Playbook"
     }
   },
-  "variables": {
-    "playbookResponderRoleDefinitionId": "f05b4121-b193-4c12-8684-edf0307e8cc1"
-  },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
@@ -75,20 +72,6 @@
         "parameters": {
           "workspaceName": { "value": "[parameters('workspaceName')]" }
         }
-      }
-    },
-
-    {
-      "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2022-04-01",
-      "name": "[guid(resourceGroup().id, 'SentinelPlaybookResponder')]",
-      "dependsOn": [
-        "PlaybookDeployment"
-      ],
-      "properties": {
-        "roleDefinitionId": "[tenantResourceId('Microsoft.Authorization/roleDefinitions', variables('playbookResponderRoleDefinitionId'))]",
-        "principalId": "307907f7-4bb6-4f16-a67d-b9fb26158293",
-        "principalType": "ServicePrincipal"
       }
     },
 
