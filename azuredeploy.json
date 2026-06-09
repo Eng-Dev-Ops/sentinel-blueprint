@@ -73,6 +73,7 @@
       "copy": {
         "name": "rulesCopyLoop",
         "count": "[length(parameters('analyticsRuleFiles'))]",
+        "mode": "Serial",
         "batchSize": 1
       },
       "properties": {
