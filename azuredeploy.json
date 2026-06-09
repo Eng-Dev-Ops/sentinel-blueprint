@@ -23,7 +23,6 @@
         "mfa_spamming.json",
         "powershell_detection.json",
         "scheduled_task_hide.json",
-        "service_account_remoteps.json",
         "service_accounts_remoteps.json",
         "sunburst_hashes.json",
         "unusual_file_deletion.json"
