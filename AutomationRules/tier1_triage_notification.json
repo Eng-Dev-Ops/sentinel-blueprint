@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": { "type": "String" },
+    "playbookResourceGroup": { "type": "string", "defaultValue": "[resourceGroup().name]" }
+  },
+  "resources": [
+    {
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/dbe80110-5a30-4108-9e84-b45c1b8cbe50')]",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/dbe80110-5a30-4108-9e84-b45c1b8cbe50')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
+      "apiVersion": "2023-12-01-preview",
+      "properties": {
+        "displayName": "Tier1-Triage-And-Notification",
+        "order": 2,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": [ "High", "Medium" ]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "ModifyProperties",
+            "actionConfiguration": {
+              "status": "Active"
+            }
+          },
+          {
+            "order": 2,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[tenantResourceId('Microsoft.Logic/workflows', parameters('playbookResourceGroup'), 'Comment_RemediationSteps')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
