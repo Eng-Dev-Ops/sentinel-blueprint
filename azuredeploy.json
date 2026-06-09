@@ -6,7 +6,7 @@
     "location": { "type": "string", "defaultValue": "[resourceGroup().location]" },
     "_artifactsLocation": {
       "type": "string",
-      "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/"
+      "defaultValue": "https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/<YOUR_REPO_NAME>/main/"
     },
     "analyticsRuleFiles": {
       "type": "array",
@@ -15,9 +15,14 @@
         "powershell_detection.json",
         "scheduled_task_hide.json"
       ]
+    },
+    "playbookName": {
+      "type": "string",
+      "defaultValue": "Sentinel-M1-Teams-Notification-Playbook"
     }
   },
   "resources": [
+    // =========================================================================
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -32,6 +37,7 @@
       }
     },
 
+    // =========================================================================
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -48,6 +54,7 @@
       }
     },
 
+    // =========================================================================
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -71,23 +78,35 @@
       }
     },
 
+    // =========================================================================
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "name": "AutomationGlueDeployment",
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'),'/AutomationRules/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
+      "name": "[concat(parameters('workspaceName'),'/Microsoft.SecurityInsights/7971fc96-9918-497e-ab15-3cf9b96b745e')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
+      "apiVersion": "2023-12-01-preview",
       "dependsOn": [
         "PlaybookDeployment",
-        "rulesCopyLoop" 
+        "rulesCopyLoop"
       ],
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(parameters('_artifactsLocation'), 'AutomationRules/incident_routing.json')]",
-          "contentVersion": "1.0.0.0"
+        "displayName": "Client-A-Auto-Triage-and-Notify",
+        "order": 1,
+        "triggeringLogic": {
+          "isEnabled": true,
+          "triggersOn": "Incidents",
+          "triggersWhen": "Created",
+          "conditions": []
         },
-        "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
-        }
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[resourceId('Microsoft.Logic/workflows', parameters('playbookName'))]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          }
+        ]
       }
     }
   ]
