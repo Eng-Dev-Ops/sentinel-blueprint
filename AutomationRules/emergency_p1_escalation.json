@@ -7,8 +7,8 @@
   },
   "resources": [
     {
-      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/5e01541f-d800-43dd-a975-094501d04386')]",
-      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/5e01541f-d800-43dd-a975-094501d04386')]",
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/1b02541f-c900-43ee-b885-194501e04399')]",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/1b02541f-c900-43ee-b885-194501e04399')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
       "apiVersion": "2023-12-01-preview",
       "properties": {
@@ -51,6 +51,3 @@
     }
   ]
 }
-
-
-
