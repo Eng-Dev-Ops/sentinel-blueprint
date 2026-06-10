@@ -41,7 +41,7 @@
             "order": 2,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[tenantResourceId('Microsoft.Logic/workflows', parameters('playbookResourceGroup'), 'Comment_RemediationSteps')]",
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, parameters('playbookResourceGroup'), 'Microsoft.Logic/workflows', 'Comment_RemediationSteps')]"
               "tenantId": "[subscription().tenantId]"
             }
           }
