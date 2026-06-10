@@ -48,7 +48,7 @@
             "order": 3,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[resourceId(subscription().subscriptionId, parameters('playbookResourceGroup'), 'Microsoft.Logic/workflows', 'AS-Azure-AD-Disable-User')]"
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, parameters('playbookResourceGroup'), 'Microsoft.Logic/workflows', 'AS-Azure-AD-Disable-User')]",
               "tenantId": "[subscription().tenantId]"
             }
           }
@@ -57,4 +57,3 @@
     }
   ]
 }
-
