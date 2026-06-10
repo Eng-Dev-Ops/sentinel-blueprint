@@ -6,7 +6,7 @@ on:
       - 'AnalyticsRules/**'
       - 'AutomationRules/**'
       - 'Playbooks/**'
-  workflow_dispatch: 
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,8 +15,11 @@ jobs:
   update-manifest:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Code with Push Authorization
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} 
+          persist-credentials: true
 
       - name: Sync Folders to azuredeploy.json Manifest Arrays
         run: |
@@ -36,7 +39,6 @@ jobs:
           echo " Automation Rules: $AUTOMATION_JSON"
           echo " Playbooks Found: $PLAYBOOK_JSON"
           
-          # Inject all three generated lists straight into their respective default parameter arrays inside azuredeploy.json
           jq --argjson alist "$ANALYTICS_JSON" --argjson olist "$AUTOMATION_JSON" --argjson plist "$PLAYBOOK_JSON" \
             '.parameters.analyticsRuleFiles.defaultValue = $alist | .parameters.automationRuleFiles.defaultValue = $olist | .parameters.playbookFiles.defaultValue = $plist' \
             azuredeploy.json > temp.json && mv temp.json azuredeploy.json
@@ -50,5 +52,5 @@ jobs:
             echo " All manifest profiles are perfectly in sync."
           else
             git commit -m "automation: dynamically tracked new analytics, automation, and playbook structures"
-            git push
+            git push origin HEAD:${{ github.ref }} 
           fi
