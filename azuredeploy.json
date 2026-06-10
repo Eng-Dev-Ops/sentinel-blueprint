@@ -20,21 +20,39 @@
     "playbookFiles": {
       "type": "array",
       "defaultValue": [
-        "as_slack_integration.json",
-        "abuseipdb_report_teams.json",
-        "comment_remediation_steps.json",
         "abuseipdb_enrichment.json",
+        "abuseipdb_report_teams.json",
+        "as_azure_ad_disable_user.json",
+        "as_slack_integration.json",
+        "comment_remediation_steps.json",
         "enrich_malwarebazaar.json",
-        "as_azure_ad_disable_user.json"
+        "teams_notification.json"
       ]
     },
     "analyticsRuleFiles": {
       "type": "array",
-      "defaultValue": []
+      "defaultValue": [
+        "brute_force_detection.json",
+        "c2_namedpipe.json",
+        "disabled_accounts_signin.json",
+        "domain_federation_modified.json",
+        "mfa_spamming.json",
+        "powershell_detection.json",
+        "scheduled_task_hide.json",
+        "sunburst_hashes.json",
+        "unusual_file_deletion.json"
+      ]
     },
     "automationRuleFiles": {
       "type": "array",
-      "defaultValue": []
+      "defaultValue": [
+        "autonomous_noise_mitigation.json",
+        "emergency_p1_escalation.json",
+        "incident_routing.json",
+        "mssp_identity_containment.json",
+        "ti_incident_enrichment.json",
+        "tier1_triage_notification.json"
+      ]
     },
     "managedIdentityName": {
       "type": "string",
@@ -48,7 +66,6 @@
       "name": "[parameters('managedIdentityName')]",
       "location": "[parameters('location')]"
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -68,7 +85,6 @@
         "parameters": {}
       }
     },
-
     {
       "condition": "[parameters('isOnboardingRequired')]",
       "type": "Microsoft.Resources/deployments",
@@ -84,11 +100,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -109,11 +126,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -134,7 +152,9 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     }
