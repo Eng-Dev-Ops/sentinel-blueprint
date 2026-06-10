@@ -4,42 +4,83 @@
   "parameters": {
     "workspaceName": {
       "type": "string",
-      "metadata": { "description": "The name of the Microsoft Sentinel Log Analytics Workspace." }
+      "metadata": {
+        "description": "The name of the Microsoft Sentinel Log Analytics Workspace."
+      }
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": { "description": "The regional location for deploying resources." }
+      "metadata": {
+        "description": "The regional location for deploying resources."
+      }
     },
     "isOnboardingRequired": {
       "type": "bool",
       "defaultValue": true,
-      "metadata": { "description": "Set to false if Microsoft Sentinel is already active on this workspace to avoid onboarding conflicts." }
+      "metadata": {
+        "description": "Set to false if Microsoft Sentinel is already active on this workspace to avoid onboarding conflicts."
+      }
     },
     "_artifactsLocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/main/",
-      "metadata": { "description": "The base URI path where the raw asset JSON blueprints are hosted on GitHub." }
+      "metadata": {
+        "description": "The base URI path where the raw asset JSON blueprints are hosted on GitHub."
+      }
     },
     "playbookFiles": {
       "type": "array",
-      "defaultValue": [],
-      "metadata": { "description": "Dynamically updated manifest array of playbook JSON files managed by the GitHub Actions Robot." }
+      "defaultValue": [
+        "abuseipdb_enrichment.json",
+        "abuseipdb_report_teams.json",
+        "as_azure_ad_disable_user.json",
+        "as_slack_integration.json",
+        "comment_remediation_steps.json",
+        "enrich_malwarebazaar.json",
+        "teams_notification.json"
+      ],
+      "metadata": {
+        "description": "Dynamically updated manifest array of playbook JSON files managed by the GitHub Actions Robot."
+      }
     },
     "analyticsRuleFiles": {
       "type": "array",
-      "defaultValue": [],
-      "metadata": { "description": "Dynamically updated manifest array of analytics rule JSON files managed by the GitHub Actions Robot." }
+      "defaultValue": [
+        "brute_force_detection.json",
+        "c2_namedpipe.json",
+        "disabled_accounts_signin.json",
+        "domain_federation_modified.json",
+        "mfa_spamming.json",
+        "powershell_detection.json",
+        "scheduled_task_hide.json",
+        "sunburst_hashes.json",
+        "unusual_file_deletion.json"
+      ],
+      "metadata": {
+        "description": "Dynamically updated manifest array of analytics rule JSON files managed by the GitHub Actions Robot."
+      }
     },
     "automationRuleFiles": {
       "type": "array",
-      "defaultValue": [],
-      "metadata": { "description": "Dynamically updated manifest array of automation rule JSON files managed by the GitHub Actions Robot." }
+      "defaultValue": [
+        "autonomous_noise_mitigation.json",
+        "emergency_p1_escalation.json",
+        "incident_routing.json",
+        "mssp_identity_containment.json",
+        "ti_incident_enrichment.json",
+        "tier1_triage_notification.json"
+      ],
+      "metadata": {
+        "description": "Dynamically updated manifest array of automation rule JSON files managed by the GitHub Actions Robot."
+      }
     },
     "managedIdentityName": {
       "type": "string",
       "defaultValue": "Sentinel-Playbook-Execution-Identity",
-      "metadata": { "description": "The name of the User-Assigned Managed Identity used to run the playbooks." }
+      "metadata": {
+        "description": "The name of the User-Assigned Managed Identity used to run the playbooks."
+      }
     }
   },
   "resources": [
@@ -49,7 +90,6 @@
       "name": "[parameters('managedIdentityName')]",
       "location": "[parameters('location')]"
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -69,7 +109,6 @@
         "parameters": {}
       }
     },
-
     {
       "condition": "[parameters('isOnboardingRequired')]",
       "type": "Microsoft.Resources/deployments",
@@ -85,11 +124,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -110,11 +150,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -135,7 +176,9 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" }
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          }
         }
       }
     }
