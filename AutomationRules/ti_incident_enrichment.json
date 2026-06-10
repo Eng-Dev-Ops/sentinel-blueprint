@@ -2,8 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workspaceName": { "type": "String" },
-    "playbookName": { "type": "string", "defaultValue": "Sentinel-M1-Teams-Notification-Playbook" }
+    "workspaceName": { "type": "String" }
   },
   "resources": [
     {
@@ -34,7 +33,15 @@
             "order": 1,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Logic/workflows', parameters('playbookName'))]",
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Logic/workflows', 'AbuseIPDB-EnrichIncidentByIPInfo')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "order": 2,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Logic/workflows', 'Enrich-MalwareBazaar')]",
               "tenantId": "[subscription().tenantId]"
             }
           }
