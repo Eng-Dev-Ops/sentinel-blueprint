@@ -181,26 +181,6 @@
           }
         }
       }
-    },
-
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "name": "Sentinel-SOC-Visual-Workbook-Deployment",
-      "dependsOn": [
-        "automationCopyLoop"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(parameters('_artifactsLocation'), 'Workbooks/workbook.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "workspaceName": { "value": "[parameters('workspaceName')]" },
-          "location": { "value": "[parameters('location')]" }
-        }
-      }
     }
   ]
 }
