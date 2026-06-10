@@ -23,6 +23,10 @@
               "inputs": {
                 "host": { "connection": { "name": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/connections/azuresentinel')]" } },
                 "path": "/incident-trigger"
+              },
+              "recurrence": {
+                "frequency": "Minute",
+                "interval": 1
               }
             }
           }
