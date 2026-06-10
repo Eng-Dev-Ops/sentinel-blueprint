@@ -5,6 +5,7 @@ on:
     paths:
       - 'AnalyticsRules/**'
       - 'AutomationRules/**'
+      - 'Playbooks/**'
 
 permissions:
   contents: write
@@ -19,30 +20,24 @@ jobs:
       - name: Sync Folders to azuredeploy.json Manifest Arrays
         run: |
           echo " Scanning AnalyticsRules..."
-          # Added "|| true" so the runner never crashes if the search hits a character resolution boundary
           ANALYTICS_FILES=$(ls AnalyticsRules/*.json 2>/dev/null | grep -v "sentinel_onboarding.json" | xargs -n 1 basename || true)
-          
-          if [ -z "$ANALYTICS_FILES" ]; then
-            ANALYTICS_JSON="[]"
-          else
-            ANALYTICS_JSON=$(echo "$ANALYTICS_FILES" | jq -R . | jq -s -c .)
-          fi
+          if [ -z "$ANALYTICS_FILES" ]; then ANALYTICS_JSON="[]"; else ANALYTICS_JSON=$(echo "$ANALYTICS_FILES" | jq -R . | jq -s -c .); fi
           
           echo " Scanning AutomationRules..."
           AUTOMATION_FILES=$(ls AutomationRules/*.json 2>/dev/null | xargs -n 1 basename || true)
+          if [ -z "$AUTOMATION_FILES" ]; then AUTOMATION_JSON="[]"; else AUTOMATION_JSON=$(echo "$AUTOMATION_FILES" | jq -R . | jq -s -c .); fi
           
-          if [ -z "$AUTOMATION_FILES" ]; then
-            AUTOMATION_JSON="[]"
-          else
-            AUTOMATION_JSON=$(echo "$AUTOMATION_FILES" | jq -R . | jq -s -c .)
-          fi
+          echo " Scanning Playbooks..."
+          PLAYBOOK_FILES=$(ls Playbooks/*.json 2>/dev/null | xargs -n 1 basename || true)
+          if [ -z "$PLAYBOOK_FILES" ]; then PLAYBOOK_JSON="[]"; else PLAYBOOK_JSON=$(echo "$PLAYBOOK_FILES" | jq -R . | jq -s -c .); fi
           
-          echo " Analytics Rules Found: $ANALYTICS_JSON"
-          echo " Automation Rules Found: $AUTOMATION_JSON"
+          echo " Analytics Rules: $ANALYTICS_JSON"
+          echo " Automation Rules: $AUTOMATION_JSON"
+          echo " Playbooks Found: $PLAYBOOK_JSON"
           
-          # Inject both generated lists straight into their respective parameter fields inside master azuredeploy.json
-          jq --argjson alist "$ANALYTICS_JSON" --argjson olist "$AUTOMATION_JSON" \
-            '.parameters.analyticsRuleFiles.defaultValue = $alist | .parameters.automationRuleFiles.defaultValue = $olist' \
+          # Inject all three generated lists straight into their respective default parameter arrays inside azuredeploy.json
+          jq --argjson alist "$ANALYTICS_JSON" --argjson olist "$AUTOMATION_JSON" --argjson plist "$PLAYBOOK_JSON" \
+            '.parameters.analyticsRuleFiles.defaultValue = $alist | .parameters.automationRuleFiles.defaultValue = $olist | .parameters.playbookFiles.defaultValue = $plist' \
             azuredeploy.json > temp.json && mv temp.json azuredeploy.json
 
       - name: Commit and Push Manifest Synchronization Changes
@@ -51,8 +46,8 @@ jobs:
           git config --global user.email "actions@github.com"
           git add azuredeploy.json
           if git diff-index --quiet HEAD --; then
-            echo " Manifest profiles are perfectly in sync."
+            echo " All manifest profiles are perfectly in sync."
           else
-            git commit -m "automation: dynamically tracked new analytics and automation rule templates"
+            git commit -m "automation: dynamically tracked new analytics, automation, and playbook structures"
             git push
           fi
