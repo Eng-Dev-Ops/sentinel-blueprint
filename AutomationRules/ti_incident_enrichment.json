@@ -34,7 +34,7 @@
             "order": 1,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[tenantResourceId('Microsoft.Logic/workflows', parameters('playbookResourceGroup'), 'AbuseIPDB-EnrichIncidentByIPInfo')]",
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, parameters('playbookResourceGroup'), 'Microsoft.Logic/workflows', 'AbuseIPDB-EnrichIncidentByIPInfo')]"
               "tenantId": "[subscription().tenantId]"
             }
           },
@@ -42,7 +42,7 @@
             "order": 2,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[tenantResourceId('Microsoft.Logic/workflows', parameters('playbookResourceGroup'), 'Enrich-MalwareBazaar')]",
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, parameters('playbookResourceGroup'), 'Microsoft.Logic/workflows', 'Enrich-MalwareBazaar')]"
               "tenantId": "[subscription().tenantId]"
             }
           }
