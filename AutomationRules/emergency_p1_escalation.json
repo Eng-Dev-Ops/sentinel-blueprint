@@ -2,13 +2,12 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workspaceName": { "type": "String" },
-    "playbookName": { "type": "string", "defaultValue": "Sentinel-M1-Teams-Notification-Playbook" }
+    "workspaceName": { "type": "String" }
   },
   "resources": [
     {
-      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/1b02541f-c900-43ee-b885-194501e04399')]",
-      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/1b02541f-c900-43ee-b885-194501e04399')]",
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/5e01541f-d800-43dd-a975-094501d04386')]",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/5e01541f-d800-43dd-a975-094501d04386')]",
       "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
       "apiVersion": "2023-12-01-preview",
       "properties": {
@@ -34,7 +33,15 @@
             "order": 1,
             "actionType": "RunPlaybook",
             "actionConfiguration": {
-              "logicAppResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Logic/workflows', parameters('playbookName'))]",
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Logic/workflows', 'AS-Slack-Integration')]",
+              "tenantId": "[subscription().tenantId]"
+            }
+          },
+          {
+            "order": 2,
+            "actionType": "RunPlaybook",
+            "actionConfiguration": {
+              "logicAppResourceId": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.Logic/workflows', 'AbuseIPDB-ReportIPsAfterUserResponseInMSTeams')]",
               "tenantId": "[subscription().tenantId]"
             }
           }
