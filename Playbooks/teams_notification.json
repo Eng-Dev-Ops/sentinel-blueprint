@@ -76,7 +76,7 @@
                 },
                 "method": "post",
                 "body": {
-                  "message": "<p>🚨 <b>Microsoft Sentinel Incident Alert!</b><br>A threat behavior has been detected and compiled by the SOC pipeline.</p>"
+                  "message": "<p> <b>Microsoft Sentinel Incident Alert!</b><br>A threat behavior has been detected and compiled by the SOC pipeline.</p>"
                 },
                 "path": "/v2/teams/conversation/message/post"
               }
@@ -88,3 +88,4 @@
     }
   ]
 }
+
