@@ -3,36 +3,33 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "workspaceName": {
-      "type": "string"
-    },
-    "playbookName": {
-      "type": "string",
-      "defaultValue": "Sentinel-M1-Teams-Notification-Playbook"
+      "type": "String"
     }
   },
   "resources": [
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
+      "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspaceName'), 'Microsoft.SecurityInsights'), '/AutomationRules/7f02541f-e900-4cbd-a915-294501e043bb')]",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/7f02541f-e900-4cbd-a915-294501e043bb')]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/AutomationRules",
       "apiVersion": "2023-12-01-preview",
-      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/', '77777777-7777-7777-7777-777777777777')]",
       "properties": {
-        "displayName": "[Loop-Automation] Route Incidents to Teams Channel",
-        "order": 1,
+        "displayName": "Incident-Routing-Control",
+        "order": 5,
         "triggeringLogic": {
           "isEnabled": true,
           "triggersOn": "Incidents",
           "triggersWhen": "Created",
-          "conditions": [],
-          "actions": [
-            {
-              "order": 1,
-              "actionType": "RunPlaybook",
-              "actionConfiguration": {
-                "logicAppResourceId": "[resourceId('Microsoft.Logic/workflows', parameters('playbookName'))]"
-              }
+          "conditions": []
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "ModifyProperties",
+            "actionConfiguration": {
+              "status": "Active"
             }
-          ]
-        }
+          }
+        ]
       }
     }
   ]
