@@ -177,13 +177,19 @@
       }
     },
     {
-      "type": "Microsoft.SecurityInsights/solutions",
-      "apiVersion": "2021-03-01-preview",
-      "name": "SecurityInsights-SecurityInsertsWindowsSecurityEvents",
+      "type": "Microsoft.OperationsManagement/solutions",
+      "apiVersion": "2015-11-01-preview",
+      "name": "[concat('SecurityInsights( ', parameters('workspaceName'), ')')]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "automationCopyLoop"
       ],
+      "plan": {
+        "name": "[concat('SecurityInsights(', parameters('workspaceName'), ')')]",
+        "product": "OMSGallery/SecurityInsights",
+        "publisher": "Microsoft",
+        "promotionCode": ""
+      },
       "properties": {
         "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
       }
@@ -194,7 +200,7 @@
       "name": "mssp-universal-windows-security-dcr",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.SecurityInsights/solutions', 'SecurityInsights-SecurityInsertsWindowsSecurityEvents')]"
+        "[resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspaceName'), ')'))]"
       ],
       "properties": {
         "dataSources": {
