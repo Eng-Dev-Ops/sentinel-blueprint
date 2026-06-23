@@ -237,9 +237,10 @@
       },
       "resources": [
         {
-          "type": "associations",
+          "type": "providers/dataCollectionRuleAssociations",
           "apiVersion": "2021-04-01",
-          "name": "teste-vm-heartbeat-association",
+          "name": "[concat('Microsoft.Insights/', 'teste-vm-heartbeat-association')]",
+          "scope": "[concat('Microsoft.Compute/virtualMachines/', 'teste')]",
           "dependsOn": [
             "Microsoft.Insights/dataCollectionRules/mssp-universal-windows-security-dcr"
           ],
