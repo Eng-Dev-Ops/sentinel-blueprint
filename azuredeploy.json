@@ -200,7 +200,7 @@
       "name": "mssp-universal-windows-security-dcr",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspaceName'), ')'))]"
+        "[concat('Microsoft.OperationsManagement/solutions/SecurityInsights(', parameters('workspaceName'), ')')]"
       ],
       "properties": {
         "dataSources": {
@@ -255,7 +255,7 @@
       "apiVersion": "2023-12-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb99')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]"
+        "Microsoft.Insights/dataCollectionRules/mssp-universal-windows-security-dcr"
       ],
       "properties": {
         "title": "[SIMULATION ALERT] Critical PowerShell Execution Event",
