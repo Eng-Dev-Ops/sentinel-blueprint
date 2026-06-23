@@ -87,7 +87,6 @@
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -110,7 +109,6 @@
         "parameters": {}
       }
     },
-
     {
       "condition": "[parameters('isOnboardingRequired')]",
       "type": "Microsoft.Resources/deployments",
@@ -130,7 +128,6 @@
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -155,7 +152,6 @@
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -180,13 +176,80 @@
         }
       }
     },
-
+    {
+      "type": "Microsoft.SecurityInsights/solutions",
+      "apiVersion": "2021-03-01-preview",
+      "name": "SecurityInsights-SecurityInsertsWindowsSecurityEvents",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "automationCopyLoop"
+      ],
+      "properties": {
+        "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2021-04-01",
+      "name": "mssp-universal-windows-security-dcr",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.SecurityInsights/solutions', 'SecurityInsights-SecurityInsertsWindowsSecurityEvents')]"
+      ],
+      "properties": {
+        "dataSources": {
+          "windowsEventLogs": [
+            {
+              "streams": [
+                "Microsoft-SecurityEvent"
+              ],
+              "xPathQueries": [
+                "Security!*"
+              ],
+              "name": "securityEventsStream"
+            }
+          ]
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+              "name": "mssp-sentinel-workspace-target"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [
+              "Microsoft-SecurityEvent"
+            ],
+            "destinations": [
+              "mssp-sentinel-workspace-target"
+            ]
+          }
+        ]
+      },
+      "resources": [
+        {
+          "type": "associations",
+          "apiVersion": "2021-04-01",
+          "name": "teste-vm-heartbeat-association",
+          "dependsOn": [
+            "Microsoft.Insights/dataCollectionRules/mssp-universal-windows-security-dcr"
+          ],
+          "properties": {
+            "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]",
+            "description": "Automated MSSP deployment mapping tracking link for host VM telemetry logs."
+          }
+        }
+      ]
+    },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/incidents",
       "apiVersion": "2023-12-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb99')]",
       "dependsOn": [
-        "automationCopyLoop"
+        "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]"
       ],
       "properties": {
         "title": "[SIMULATION ALERT] Critical PowerShell Execution Event",
