@@ -179,7 +179,7 @@
     {
       "type": "Microsoft.OperationsManagement/solutions",
       "apiVersion": "2015-11-01-preview",
-      "name": "[concat('SecurityInsights( ', parameters('workspaceName'), ')')]",
+      "name": "[concat('SecurityInsights(', parameters('workspaceName'), ')')]",
       "location": "[parameters('location')]",
       "dependsOn": [
         "automationCopyLoop"
