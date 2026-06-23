@@ -234,29 +234,27 @@
             ]
           }
         ]
-      },
-      "resources": [
-        {
-          "type": "providers/dataCollectionRuleAssociations",
-          "apiVersion": "2021-04-01",
-          "name": "[concat('Microsoft.Insights/', 'teste-vm-heartbeat-association')]",
-          "scope": "[concat('Microsoft.Compute/virtualMachines/', 'teste')]",
-          "dependsOn": [
-            "Microsoft.Insights/dataCollectionRules/mssp-universal-windows-security-dcr"
-          ],
-          "properties": {
-            "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]",
-            "description": "Automated MSSP deployment mapping tracking link for host VM telemetry logs."
-          }
-        }
-      ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+      "apiVersion": "2021-04-01",
+      "name": "teste-vm-heartbeat-association",
+      "scope": "[format('Microsoft.Compute/virtualMachines/{0}', 'teste')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]"
+      ],
+      "properties": {
+        "dataCollectionRuleId": "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]",
+        "description": "Automated MSSP deployment mapping tracking link for host VM telemetry logs."
+      }
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/incidents",
       "apiVersion": "2023-12-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb99')]",
       "dependsOn": [
-        "Microsoft.Insights/dataCollectionRules/mssp-universal-windows-security-dcr"
+        "[resourceId('Microsoft.Insights/dataCollectionRules', 'mssp-universal-windows-security-dcr')]"
       ],
       "properties": {
         "title": "[SIMULATION ALERT] Critical PowerShell Execution Event",
