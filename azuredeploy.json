@@ -61,6 +61,11 @@
       ],
       "metadata": { "description": "Dynamically updated manifest array of automation rule JSON files managed by the GitHub Actions Robot." }
     },
+    "maxSize": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": { "description": "Max loop control baseline threshold variable." }
+    },
     "managedIdentityName": {
       "type": "string",
       "defaultValue": "Sentinel-Playbook-Execution-Identity",
@@ -195,11 +200,22 @@
       }
     },
     {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/onboardingStates",
+      "apiVersion": "2023-02-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationsManagement/solutions/SecurityInsights(', parameters('workspaceName'), ')')]"
+      ],
+      "properties": {
+        "customerClassName": "MSSP_Client_Baseline"
+      }
+    },
+    {
       "type": "Microsoft.OperationalInsights/workspaces/providers/incidents",
       "apiVersion": "2023-12-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb99')]",
       "dependsOn": [
-        "[concat('Microsoft.OperationsManagement/solutions/SecurityInsights(', parameters('workspaceName'), ')')]"
+        "[concat('Microsoft.OperationalInsights/workspaces/providers/onboardingStates/', parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]"
       ],
       "properties": {
         "title": "[SIMULATION ALERT] Critical PowerShell Execution Event",
