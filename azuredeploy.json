@@ -4,30 +4,22 @@
   "parameters": {
     "workspaceName": {
       "type": "string",
-      "metadata": {
-        "description": "The name of the Microsoft Sentinel Log Analytics Workspace."
-      }
+      "metadata": { "description": "The name of the Microsoft Sentinel Log Analytics Workspace." }
     },
     "location": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "The regional location for deploying resources."
-      }
+      "metadata": { "description": "The regional location for deploying resources." }
     },
     "isOnboardingRequired": {
       "type": "bool",
       "defaultValue": true,
-      "metadata": {
-        "description": "Set to false if Microsoft Sentinel is already active on this workspace to avoid onboarding conflicts."
-      }
+      "metadata": { "description": "Set to false if Microsoft Sentinel is already active on this workspace to avoid onboarding conflicts." }
     },
     "_artifactsLocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/Eng-Dev-Ops/sentinel-blueprint/testing/",
-      "metadata": {
-        "description": "The base URI path where the raw asset JSON blueprints are hosted on GitHub."
-      }
+      "metadata": { "description": "The base URI path where the raw asset JSON blueprints are hosted on GitHub." }
     },
     "playbookFiles": {
       "type": "array",
@@ -40,9 +32,7 @@
         "enrich_malwarebazaar.json",
         "teams_notification.json"
       ],
-      "metadata": {
-        "description": "Dynamically updated manifest array of playbook JSON files managed by the GitHub Actions Robot."
-      }
+      "metadata": { "description": "Dynamically updated manifest array of playbook JSON files managed by the GitHub Actions Robot." }
     },
     "analyticsRuleFiles": {
       "type": "array",
@@ -57,9 +47,7 @@
         "sunburst_hashes.json",
         "unusual_file_deletion.json"
       ],
-      "metadata": {
-        "description": "Dynamically updated manifest array of analytics rule JSON files managed by the GitHub Actions Robot."
-      }
+      "metadata": { "description": "Dynamically updated manifest array of analytics rule JSON files managed by the GitHub Actions Robot." }
     },
     "automationRuleFiles": {
       "type": "array",
@@ -71,23 +59,17 @@
         "ti_incident_enrichment.json",
         "tier1_triage_notification.json"
       ],
-      "metadata": {
-        "description": "Dynamically updated manifest array of automation rule JSON files managed by the GitHub Actions Robot."
-      }
+      "metadata": { "description": "Dynamically updated manifest array of automation rule JSON files managed by the GitHub Actions Robot." }
     },
     "maxSize": {
       "type": "int",
       "defaultValue": 10,
-      "metadata": {
-        "description": "Max loop control baseline threshold variable."
-      }
+      "metadata": { "description": "Max loop control baseline threshold variable." }
     },
     "managedIdentityName": {
       "type": "string",
       "defaultValue": "Sentinel-Playbook-Execution-Identity",
-      "metadata": {
-        "description": "The name of the User-Assigned Managed Identity used to run the playbooks."
-      }
+      "metadata": { "description": "The name of the User-Assigned Managed Identity used to run the playbooks." }
     }
   },
   "resources": [
@@ -147,9 +129,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": {
-            "value": "[parameters('workspaceName')]"
-          }
+          "workspaceName": { "value": "[parameters('workspaceName')]" }
         }
       }
     },
@@ -173,9 +153,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": {
-            "value": "[parameters('workspaceName')]"
-          }
+          "workspaceName": { "value": "[parameters('workspaceName')]" }
         }
       }
     },
@@ -199,9 +177,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "workspaceName": {
-            "value": "[parameters('workspaceName')]"
-          }
+          "workspaceName": { "value": "[parameters('workspaceName')]" }
         }
       }
     },
@@ -232,6 +208,7 @@
       ],
       "properties": {
         "contentId": "microsoft-sentinel-solutions-windowssecurityevents",
+        "contentProductId": "microsoft-sentinel-solutions-windowssecurityevents",
         "version": "3.0.1",
         "displayName": "Windows Security Events",
         "contentKind": "Solution",
