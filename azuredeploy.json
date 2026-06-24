@@ -204,7 +204,7 @@
       "apiVersion": "2023-04-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]",
       "dependsOn": [
-        "[concat('Microsoft.OperationsManagement/solutions/SecurityInsights(', parameters('workspaceName'), ')')]"
+        "[resourceId('Microsoft.OperationsManagement/solutions', concat('SecurityInsights(', parameters('workspaceName'), ')'))]"
       ],
       "properties": {
         "contentId": "microsoft-sentinel-solutions-windowssecurityevents",
@@ -218,7 +218,7 @@
       "apiVersion": "2023-12-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb99')]",
       "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/providers/contentPackages/', parameters('workspaceName'), '/Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]"
+        "[resourceId('Microsoft.OperationalInsights/workspaces/providers/contentPackages', parameters('workspaceName'), 'Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]"
       ],
       "properties": {
         "title": "[SIMULATION ALERT] Critical PowerShell Execution Event",
