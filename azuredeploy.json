@@ -200,22 +200,20 @@
       }
     },
     {
-      "type": "Microsoft.OperationalInsights/workspaces/providers/onboardingStates",
-      "apiVersion": "2023-02-01-preview",
-      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]",
+      "type": "Microsoft.SecurityInsights/onboardingStates",
+      "apiVersion": "2023-02-01",
+      "name": "[concat(parameters('workspaceName'), '/default')]",
       "dependsOn": [
         "[concat('Microsoft.OperationsManagement/solutions/SecurityInsights(', parameters('workspaceName'), ')')]"
       ],
-      "properties": {
-        "customerClassName": "MSSP_Client_Baseline"
-      }
+      "properties": {}
     },
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/contentPackages",
       "apiVersion": "2023-04-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]",
       "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/providers/onboardingStates/', parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]"
+        "[concat('Microsoft.SecurityInsights/onboardingStates/', parameters('workspaceName'), '/default')]"
       ],
       "properties": {
         "contentId": "microsoft-sentinel-solutions-windowssecurityevents",
