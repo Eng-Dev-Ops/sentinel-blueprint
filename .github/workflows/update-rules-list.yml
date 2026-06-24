@@ -2,6 +2,9 @@ name: Auto Update Sentinel Blueprints Manifest
 
 on:
   push:
+    branches:
+      - main
+      - testing
     paths:
       - 'AnalyticsRules/**'
       - 'AutomationRules/**'
