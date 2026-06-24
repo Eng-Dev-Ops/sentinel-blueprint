@@ -200,10 +200,9 @@
       }
     },
     {
-      "type": "Microsoft.SecurityInsights/onboardingStates",
-      "apiVersion": "2023-02-01",
-      "name": "default",
-      "scope": "[tenantResourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]",
+      "type": "Microsoft.OperationalInsights/workspaces/providers/onboardingStates",
+      "apiVersion": "2023-02-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]",
       "dependsOn": [
         "[concat('Microsoft.OperationsManagement/solutions/SecurityInsights(', parameters('workspaceName'), ')')]"
       ],
@@ -214,7 +213,7 @@
       "apiVersion": "2023-04-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]",
       "dependsOn": [
-        "[resourceId('Microsoft.SecurityInsights/onboardingStates', 'default')]"
+        "[concat('Microsoft.OperationalInsights/workspaces/providers/onboardingStates/', parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]"
       ],
       "properties": {
         "contentId": "microsoft-sentinel-solutions-windowssecurityevents",
