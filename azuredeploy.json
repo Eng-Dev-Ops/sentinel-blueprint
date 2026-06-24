@@ -211,11 +211,25 @@
       }
     },
     {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/contentPackages",
+      "apiVersion": "2023-04-01-preview",
+      "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]",
+      "dependsOn": [
+        "[concat('Microsoft.OperationalInsights/workspaces/providers/onboardingStates/', parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]"
+      ],
+      "properties": {
+        "contentId": "microsoft-sentinel-solutions-windowssecurityevents",
+        "version": "3.0.1",
+        "displayName": "Windows Security Events",
+        "contentKind": "Solution"
+      }
+    },
+    {
       "type": "Microsoft.OperationalInsights/workspaces/providers/incidents",
       "apiVersion": "2023-12-01-preview",
       "name": "[concat(parameters('workspaceName'), '/Microsoft.SecurityInsights/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb99')]",
       "dependsOn": [
-        "[concat('Microsoft.OperationalInsights/workspaces/providers/onboardingStates/', parameters('workspaceName'), '/Microsoft.SecurityInsights/default')]"
+        "[concat('Microsoft.OperationalInsights/workspaces/providers/contentPackages/', parameters('workspaceName'), '/Microsoft.SecurityInsights/Azuresentinel-microsoft-sentinel-solutions-windowssecurityevents')]"
       ],
       "properties": {
         "title": "[SIMULATION ALERT] Critical PowerShell Execution Event",
